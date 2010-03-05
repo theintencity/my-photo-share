@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This is the dialog box for the privacy settings of the user.
+-->
+
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" styleName="Popup" 
+	width="400" height="300" showCloseButton="true" alpha="1.0" title="Privacy Settings for Friends"
+	creationComplete="createdHandler(event)"
+	close="closeHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			public var photos:Photos;
+			
+			[Bindable]
+			private var _error:String = "";
+			
+			[Bindable]
+			private var _all:Boolean = true;
+			
+			[Bindable]
+			private var _original:String = "";
+			
+			private function createdHandler(event:Event):void
+			{
+				var resultHandler:Function = function(event:ResultEvent):void
+				{
+					trace("privacy received " + event.result);
+					var users:Array = [];
+					for each (var xml:XML in event.result.user) {
+						users.push(String(xml));
+					}
+					users = users.sort();
+					if (users.length > 0) {
+						_all = false;
+						_original = _text.text = (users.length > 0 ? users.join("\r") : "");
+					}
+					else {
+						_all = true;
+					}
+				};
+				
+				var faultHandler:Function = function(event:FaultEvent):void {
+					trace("privacy load: " + event.message);
+					_error = "Error loading existing privacy information";
+				}
+				
+				trace("loading /api/privacy");
+				PhotoApi.request("/api/privacy", resultHandler, faultHandler);
+			}
+			
+			private function saveHandler(event:Event):void
+			{
+				var newUsers:Array = _text.text.split(/[\ ;,\r]/);
+				_original = _text.text;
+				
+				var resultHandler:Function = function(event:ResultEvent):void {
+					_error = "Saved privacy information";
+					photos.load(); // reload the photos
+					photos.tileView = true;
+					closeHandler(null);
+				}
+				
+				var faultHandler:Function = function(event:FaultEvent):void {
+					_error = "Error saving privacy information";
+				}
+				
+				var add:Array = [];
+				if (_check.selected) {
+					// no need to add anything
+				}
+				else {
+					// add all the items
+					for each (var newUser:String in newUsers) {
+						if (newUser.replace(/\ /g, '') != "")
+							add.push(newUser);
+					}
+				}
+				
+				trace("loading /api/privacy?add=" + add.join(","));
+				PhotoApi.request("/api/privacy?add=" + add.join(","), resultHandler, faultHandler);
+			}
+			
+			private function closeHandler(event:Event):void
+			{
+				if (this.isPopUp) {
+					PopUpManager.removePopUp(this);
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	
+	<mx:CheckBox id="_check" fontSize="12" label="Show photos from any one who shares with me" selected="{_all}" 
+		top="5" left="10" change="if (!_check.selected) _text.setFocus()"/>
+	
+	<mx:Text text="-OR-" horizontalCenter="0" top="25"/>
+	
+	<mx:Text text="List emails, one per line, whose shared photos to show:"
+		top="45" left="10" right="10"/>
+		
+	<mx:Text text="(Empty list means show from anyone)" fontSize="10" textAlign="center"
+		top="57" left="10" right="10"/>
+		
+	<mx:TextArea id="_text" enabled="{!_check.selected}" top="80" left="10" right="10" bottom="40"/>
+	
+	<mx:Button styleName="PopupButton" label="Save" visible="{_error == ''}"
+		bottom="10" width="60" height="24" horizontalCenter="0" 
+		enabled="{_original != _text.text || _all != _check.selected}" 
+		click="saveHandler(event)" />
+
+	<mx:Text text="{_error}" visible="{_error != ''}" bottom="10" left="10" right="10" color="#ff0000"/>
+
+</mx:TitleWindow>

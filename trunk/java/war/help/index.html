@@ -1,0 +1,313 @@
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>My Photo Share -- Help</title>
+</head>
+
+<body>
+<h1>My Photo Share</h1>
+<h4>By <a href="mailto:mamta_singh02@yahoo.com">Mamta Singh</a></h4>
+
+<p>This is a photo sharing, viewing and editing application written using Flex front end and Java backend 
+for Google App engine. Visit 
+<a href="http://my-photo-share.appspot.com">http://my-photo-share.appspot.com</a> to see the 
+online version of the software.</p>
+
+<p>This document describes the features and how to use the software: 
+Getting started, uploading images, tile and list view, assigning tags, rotate and flip,
+resize, delete, sharing and privacy, zoom in and zoom out, download, known issues, and
+more ideas for future work.</p>
+
+<h2>Getting Started</h2>
+
+1. When you visit the main page, and if you are not already logged in to Google it will take you to the 
+Google login page as follows. You can login using your Google account user name and password.
+
+<br/><img src="google-login.png"/><br/>
+
+<br/>2. After you login, you are redirected back to the main page. The main page shows your
+photo views and some top-level menu options as follows.
+
+<br/><img src="top-menu.png"/> <br/>
+
+<br/>3. Then click on the "Upload" link on the menu to upload some image files from your computer.
+When you click on the link it will open a file dialog box which allows you to upload
+one or <b>more</b> files at the same time. The following shows three photos selected and 
+then the select button is clicked. I recommend uploading a few images only at a time.
+
+<br/><img src="file-upload.png"/><br/>
+
+<br/>4. After your photos are uploaded, which takes a few seconds, you will be able to see your
+photos, by default in tile view as follows. Each photo shows the caption derived from file name,
+and if it is shared by someone else then email address of that owner:
+
+<br/><img src="tile-view.png" /><br/>
+
+<h2>Uploading Images</h2>
+
+<p>The previous section described how to upload images by clicking on the upload button and 
+selecting one or more images. Only the JPEG and PNG images are supported.
+The images are stored in the Google App Engine data store. The server first creates a thumb-nail 256x256
+of the uploaded image, then stores both the original data and the thumb nail. The thumb-nail images
+are typically displayed in the tile view whereas the full image is displayed in the list view 
+for efficiency.</p>
+
+<p>I have tested with uploading simple JPEG photographs with simple file names to the system and
+it works well. Once you upload one or more files, it puts the blank box in the view with name of the
+file and a "Loading" text. Once the file is uploaded and the thumb-nails are downloaded, it
+replaces the blank box with the actual image thumb-nail and you can see the uploaded images.</p>
+
+<p>Only files of size <b>less than 1 MB</b> are allows to be uploaded. I have implemented the 
+blobstore based server code also which allowed storing larger than 1 MB files, and it worked
+well with the local testing. However Google Apps Engine requires billing to be enabled if I
+want to use blobstore service on the actual site. So I disabled upload of more than 1 MB file
+sizes, by checking in the client itself, and prompting the user if the file sizes are more
+than 1 MB.</p>
+
+<p>The main page displays all the images that are viewable by you including your uploaded images.
+The view automatically adjusts when you resize the browser by adjusting number of columns and rows
+in the tile view.</p>
+
+<h2>Tile and List View</h2>
+
+<p>The software supports two viewing modes. The default is the Tile view where all your uploaded
+images are laid out in a tile. When you click on the "List" link item on the top menu, it changes
+the view to the "list" view where you have the list of all the thumb-nail on the right and the
+currently selected image item with bigger size on left. In list view, the menu item changes to "Tile"
+and clicking on it takes you back to tile view. You can also <b>double-click an image</b> to change
+to list view with that image as selected image. You can double-click the selected image on the 
+left in the list view to go back to tile view. An example list view is shown below.</p>
+
+<img src="list-view.png" />
+
+<p>Some operations are supported only in tile view and some only in list view. For example, multiple
+selection is supported only in tile view. The zoom-in, zoom-out and photo-download are supported only
+in list view. I will describe these features later.</p>
+
+<p>In the tile view you can drag one or more images to other position to re-order. In list view you can
+use the up and down arrow keys to navigate through your selection. You can also use the mouse
+click to select an image from the right hand side list.</p>
+
+<p>In the list view the selected image is shown in larger size on the left. The actual image data is
+downloaded for this instead of using the thumb-nail data, whereas all the tile view images 
+and the right-hand side list images are shown in thumb view. You may see the quality of
+the larger size image as poor for some time until the larger size image is downloaded and replaces
+the thumb-nail image on the left. On fast connection this may appear as a flicker of the left 
+image in list view as you navigate through the image list. The flicker will go away if you are
+navigating the second time because the larger size image is already downloaded. On slow
+connection you can see the poor quality image for some time before getting replaced by the 
+higher quality image.</p>
+
+
+<h2>Assigning Tags</h2>
+
+<p>The caption below the image is editable by the owner to any value. For example, you can store
+comma separated tags. The caption or tags are stored in the google app engine data store associated
+with this image. The following shows that the caption changes into a editable text box which
+allows you to <b>edit the text and press enter</b> to save the updated text. If you reload the page the
+new text will be visible. Note that the caption of the image not owned by you will not be editable.</p>
+
+<img src="edit-tag.png" />
+
+<h2>Rotate and Flip</h2>
+
+<p>You can perform several operations on your images by selecting <b>one or more</b> images. In tile
+view you can select multiple images using the standard key combination (e.g., Command-key + mouse click to 
+add or remove selection on Mac OS). The selected image is displayed with blue background to indicate 
+selection. In list view you can have only one selected image.</p>
+
+<p>If you select one or more images, a secondary menu appears on the bottom left corner of your page.
+This secondary menu allows you to do several operations such as rotate, flip or resize the selected images.
+The following shows the secondary menu with options to Share, Delete, Rotate, Flip and Resize
+the selected images.</p>
+
+<img src="second-menu.png" />
+
+<p>You can click on the rotate and flip buttons to rotate or flip the selected images accordingly.
+Currently it allows rotate-left (or rotate counter-clock) and rotate-right (or rotate clock) by
+90 degrees. The "flip H" means flip horizontal and "flip V" is flip vertical. The following
+shows that some selected images are rotated counter-clock wise.</p>
+
+<img src="rotate.png" />
+
+<p>The image operations actually happen on the server using the Google Apps Engines image service.
+The client initiates the request, and after success, it downloads the thumb view again to show
+the modified image. Hence you may see some delay between clicking on the button and actual
+image rotation.</p>
+
+<p>The image modification can be done only if the image is owned by you, i.e., your account uploaded
+the image, and cannot be done if the image is shared to you by some other account.</p>
+
+<h2>Resize</h2>
+
+<p>When you mouse over an image it shows the current dimensions (size) of the image in WxH in the
+bottom-right corner over the image using white text. For example if the original image you
+uploaded was 1024x768 pixels, it will show "1024x768". Note that it is "x" and not "*".</p>
+
+<p>When you click on the "Resize" button in the secondary menu, it changes to an editable text
+box where you can enter another size, e.g., 640x480 and press enter to save. Note that
+the format of size is with "x", and not with "*". The following
+shows the text box with new size typed by the user before pressing "enter" key. The error
+checking if any is done on the server side.</p>
+
+<img src="resize.png" />
+
+<p>After you re-size, you can see the new size on the image on mouse-over. The re-size is
+done on the server side using Google Apps Engine image service. Since the display always shows the
+thumb-nails of 256x256 in tile view, you won't see any noticeable difference in the picture quality.
+If you select multiple images before clicking on re-size, you can re-size multiple images
+in the same request.</p>
+
+<h2>Delete</h2>
+
+<p>The secondary menu has a "Delete" button which allows you to delete the selected images.
+You can only delete the images owned by you, and not the ones shared to you. Selecting
+multiple images before clicking the delete button allows you to delete multiple images in the 
+same request. In the list view clicking the delete button deletes the current displayed
+image on the left.</p>
+
+<p>The image deletion is permanent, and cannot be recovered once deleted on the server.</p>
+
+<h2>Sharing and Privacy</h2>
+
+<p>The secondary menu has a "Share" button which allows you to share one or more images with
+other accounts (or email addresses). The top-menu has a "Privacy" link which allows you to
+filter the user accounts (or email addresses) whose shared images you want to view.</p>
+
+<p>When you select one image, and click on the "Share" button on the secondary menu, the
+dialog box appears which lists the current emails addresses to whom you have shared this
+image with. You can edit this list, by adding or removing email addresses, and click on the 
+save button to save the new sharing information for that selected file. The save button is enabled
+only after you make some change. The following shows the dialog box.</p> 
+
+<img src="share-one.png" />
+
+<p>You need to click on the close button on top-right corner to
+close the dialog box after saving. Any success or failure message is displayed in the 
+dialog box.</p>
+
+<p>When you select more than one image, and click on the "Share" button, a different
+dialog box appears as shown below. This allows you to add email addresses with which
+you want to share or unshare the selected images. Whatever email addresses you list
+in the "Add share with" section will be added to the share information for all the
+selected files. Whatever email addresses you list in the "Remove share with" section will
+be removed from the share information for all the selected files. For adding, if
+an email is already in the share information of a file, it is ignored. Similarly, 
+for deleting if an email is not in the share information of a file, it is ignored.</p>
+
+<img src="share-many.png" />
+
+<p>The dialog box is different for the multiple-selection because for multiple files
+the shared email addresses will be different. So it is not possible to display a single
+list of email addresses and allow both add and remove from the share information for
+all the files. For a single file, it is possible to first get the existing share information
+and have the user edit the list.</p>
+
+<p>All the shared images have a label indicating the email address who owns the image.
+This may be different from the email addresses who shared the image with you. 
+For example if user A uploaded the image, and shared with user B, then user B shared it
+with you, then you will see user A's email address below that image in your view.</p>
+
+<p>The sharing information is shored on the server side using Google data store. 
+There is no automatic email sent to the email addresses you provide though. Your images
+view by default displays all the images that are owned (or uploaded) by you, as well
+as all the images that are shared by others to your email address. For example,
+the screen shot shown in this document shows one file that is shared by another user
+to this user (test@example.com).</p>
+
+<p>You can restrict whose images you want to view using the "Privacy" link on the top menu.
+When you click on the "Privacy" link it opens a dialog box as follows.</p>
+
+<img src="privacy.png" />
+
+<p>The default is to show photos from anyone who shares with you indicated by the check box.
+If you unselect this check box, you can edit the list of email addresses whose shared
+photos you want to view. After any change the save button is enabled, and you can click on the save
+button to save your changes.</p>
+
+<p>An empty list of email addresses is treated as show from anyone.
+If you do not want to show any one else's images, enter some invalid email address there.
+This privacy option is used to avoid seeing unwanted images in your view. The data is
+stored on the server side using Google data store.</p>
+
+<p>When you save the privacy settings, it re-loads your images view and changes to the 
+default tile view. The new images view contains the filter you applied. The dialog box
+automatically closes when you click on save.</p>
+
+<h2>Zoom In and Zoom Out</h2>
+
+<p>The list view supports zoom-in and zoom-out of the selected larger image view. This
+is different from re-size option since the server side image data is not modified.
+The left side image on the list view has some buttons on the top-right corner of the image
+as shown below. These buttons appear only if you mouse over the larger image.</p>
+
+<img src="buttons.png" />
+
+<p>The + and - buttons allow you to zoom in and zoom out, respectively. The D button is to
+download this image file.</p>
+
+<p>You can zoom in to bring the view to show the image in larger. Since the overall
+display area is fixed, but the image view is bigger when you zoom in, you can drag the
+image view to see a different part of the image in the display area. The image is scaled
+by 20% if larger than default view and by 10% if smaller than default view. This makes it
+zoom in faster if you want to view some small part of the image, and makes it zoom
+out in reasonable steps instead of quickly when reducing the view size.</p>
+
+<h2>Download an Image</h2>
+
+You can download an image in the list view by clicking on the D button on the top-right corner
+of the left selected image. It will prompt you for file name to save the image file as.
+The original image data is downloaded.
+
+<h2>Known Issues</h2>
+
+<br/>1. Because of the restriction described in "Uploading Images" section, only files smaller
+than 1 MB size can be uploaded. Although larger sized files worked on my local test using
+blobstore service, it needs billing enabled on site, so I disabled upload of larger sized files.
+
+<br/>2. The ActionScript's FileReference object does not dispatched the "complete" event even when
+the file upload is successful on site, but works reasonably okay on local. To workaround this I assume
+that the file is uploaded if the "complete" event is not dispacthed in 5 seconds. Because of this
+if you uplaod a lot of images at the same time, there may be problems like missing
+caption for some or some images not shown.
+
+<br/>3. The ActionScript's FileReference object sometimes dispatches I/O Error event with some
+mysterious code #2038 even when the operation is successful. On the web I found many people facing
+this problem, and one suggestion was to treat this kind of error as success. I assume I/O Error
+with #2038 as success.
+
+<br/>4. You cannot edit tags/caption or image data (rotate, flip, delete) of files that are not owned
+by you. If you select multiple files, some of which are not owned by you, and try to perform some
+operation (e.g., rotate), then only the files owned by you will be modified. Since the secondary menu
+is displayed for one or more selected files, disabling the option from secondary menu is not possible.
+
+<br/>5. When you delete a file not owned by you, it will only delete temporarily from your view. If
+you refresh the page, it will appear again. To avoid viewing other people's files, use the privacy
+option and give some other invalid email address in the list.
+
+<br/>6. The flicker of image in the list view is described in "Tile and List Views" section.
+It happens because the view changes from the thumb-nail data to the original image data.
+
+<br/>7. When you switch from list view to tile view, even though an image is selected the
+Tile component in ActionScript doesn't indicate so immediately, hence my secondary menu gets
+hidden. To make it re-appear, you can un-select and re-select the image by using
+Command-key + mouse click on that image on Mac OS.
+
+<h2>More Ideas for Future Work</h2>
+
+I considered several additional ideas but couldn't implement due to lack of time. 
+<br/>1. Slide show of selected images, and ability to send the slide show URL to any one
+who can view it and download files of the slideshow without logging in.
+
+<br/>2. Categorize the images using labels similar to how Gmail uses labels. Use drag-drop
+to move images around labels (or folders). This is similar to the albums in other photo share 
+sites.
+
+<br/>3. Allow labeling and tagging part of an image by selecting a rectangular area and labeling
+it. 
+
+<br/>4. Allow friends to comment on shared images. Allow searching using tags or comments.
+
+
+</body>
+</html>

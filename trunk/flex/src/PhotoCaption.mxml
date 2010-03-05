@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This class presents the photo caption view. It is a text which when clicked
+gets converted to a editable text input box. The user can type a new caption and 
+press enter, and this dispatches the "captionChange" event.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" styleName="PhotoCaption" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	>
+	
+	<mx:Metadata>
+		[Event(name="captionChange", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			public var photo:Photo;
+			
+			[Bindable]
+			private var editing:Boolean = false;
+			
+			private function save(event:Event):void
+			{
+				if (photo.caption != _textInput.text) {
+					photo.caption = _textInput.text;
+					dispatchEvent(new Event("captionChange", true, true));
+				}
+				editing = false;
+			}
+			
+			private function textClickHandler(event:Event):void
+			{
+				event.stopImmediatePropagation()
+				if (photo.author == PhotoApi.user) {
+					editing=true;
+					_textInput.setFocus();
+					_textInput.setSelection(0, _textInput.text.length);
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Text id="_text" text="{photo.caption}" visible="{!editing}" 
+		textAlign="left" x="{Math.max(0, this.width/2 - _text.width/2)}" 
+		mouseChildren="false" useHandCursor="true" buttonMode="true"
+		toolTip="{photo.author != PhotoApi.user ? 'Cannot edit photo by others' : 'Click to edit the caption and tags'}"
+		click="textClickHandler(event)"
+		mouseUp="event.stopImmediatePropagation()" mouseDown="event.stopImmediatePropagation()"
+		/>
+	
+	<mx:TextInput id="_textInput" text="{photo.caption}" visible="{editing}" horizontalCenter="0"
+		enter="save(event)" 
+		toolTip="Enter caption or comma separated tags"
+		mouseUp="event.stopImmediatePropagation()" mouseDown="event.stopImmediatePropagation()"
+		click="event.stopImmediatePropagation()"
+		keyDown="event.stopPropagation()" keyUp="event.stopPropagation()"
+		/>
+	
+</mx:Canvas>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This is the main entry point of the Flex application which initiates the login
+process and shows the MainView when login is successful.
+-->
+
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:all="*" 
+	layout="absolute" creationComplete="created()">
+	
+	<mx:Style source="style.css"/>
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			
+			[Bindable]
+			private var logoutURL:String;
+			
+			[Bindable]
+			private var photos:Photos = new Photos();
+			
+			private function created():void
+			{
+				var resultHandler:Function = function (event:ResultEvent):void {
+					if (event.result.user != undefined) {
+						PhotoApi.user = String(event.result.user);
+						logoutURL = String(event.result.url);
+						photos.load();
+						_main.visible = true;
+					}
+					else {
+						navigateToURL(new URLRequest(String(event.result.url)), "_top");
+					}
+				};
+				
+				var faultHandler:Function = function(event:FaultEvent):void {
+					Alert.show("Cannot invoke the login API: " + event.message.toString().substr(0, 200), "Error");
+				}
+				
+				PhotoApi.request("/api/login.jsp?url=" + PhotoApi.baseURL, resultHandler, faultHandler);
+			}
+			
+			
+			private function logout():void
+			{
+				if (logoutURL != null)
+					navigateToURL(new URLRequest(logoutURL), "_top");
+			}
+			
+			private function help():void
+			{
+				navigateToURL(new URLRequest("/help/index.html"), "_top");
+			}
+		]]>
+	</mx:Script>
+	
+	<all:MainView id="_main" photos="{photos}" logout="logout()" help="help()" visible="false"/>
+	
+</mx:Application>

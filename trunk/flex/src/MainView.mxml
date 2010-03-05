@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This is the main view of the application which includes the top-level menu, the main canvas area
+and the sliding secondary menu buttons.
+-->
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:all="*" 
+	width="100%" height="100%" verticalGap="0">
+	
+	<mx:Metadata>
+		[Event(name="logout", type="flash.events.Event")]
+		[Event(name="help", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			[Bindable]
+			public var photos:Photos;
+		]]>
+	</mx:Script>
+	
+	<all:TopBar photos="{photos}"/>
+	
+	<mx:HRule width="100%" strokeWidth="1" strokeColor="#808080"/>
+	
+	<mx:Canvas width="100%" height="100%">
+		<all:MainCanvas photos="{photos}"/>
+
+		<all:ButtonBar id="_buttonBar" photos="{photos}" bottom="20" x="{photos.selected ? 0 : -80}"
+			moveEffect="{moveEffect}"/>
+			
+		<mx:Text styleName="LoadingText" text="Please upload some photos"
+			horizontalCenter="0" verticalCenter="0"
+			includeInLayout="{photos.items.length == 0}" visible="{photos.items.length == 0}"
+			mouseChildren="false" useHandCursor="true" buttonMode="true"
+			click="photos.upload()" />
+	</mx:Canvas>
+		
+	<mx:Move id="moveEffect" duration="500"/>
+</mx:VBox>
