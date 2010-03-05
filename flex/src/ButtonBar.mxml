@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This class presents the secondary menu with several buttons.
+Any user clicks triggers appropriate action on the photos object, e.g., photos.rotateLeft().
+-->
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:all="*" 
+	styleName="ButtonBar" width="80" autoLayout="true">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.PropertyChangeEvent;
+			
+			[Bindable]
+			public var photos:Photos;
+		]]>
+	</mx:Script>
+	
+	<!--
+	<mx:Button styleName="ButtonBarButton" width="100%" height="20" buttonMode="true" 
+		label="Download" toolTip="Download selected photo"
+		click="photos.download()" />
+	-->
+	<mx:Button styleName="ButtonBarButton" width="100%" height="20" buttonMode="true" 
+		label="Share" toolTip="Share photo with your friends"
+		click="photos.share()" />
+	<mx:Button styleName="ButtonBarButton" width="100%" height="20" buttonMode="true" 
+		label="Delete" toolTip="Delete selected photo or album"
+		click="photos.remove()" />
+	<mx:Button styleName="ButtonBarButton" width="100%" height="20" buttonMode="true" 
+		label="Rotate &lt;-" toolTip="Rotate counter-clockwise"
+		click="photos.rotateLeft()" />
+	<mx:Button styleName="ButtonBarButton" width="100%" height="20" buttonMode="true" 
+		label="Rotate -&gt;" toolTip="Rotate clockwise"
+		click="photos.rotateRight()" />
+	<mx:Button styleName="ButtonBarButton" width="100%" height="20" buttonMode="true" 
+		label="Flip H" toolTip="Flip horizontally"
+		click="photos.flipHorizontal()" />
+	<mx:Button styleName="ButtonBarButton" width="100%" height="20" buttonMode="true" 
+		label="Flip V" toolTip="Flip vertical"
+		click="photos.flipVertical()" />
+	<all:ButtonPrompt buttonStyleName="ButtonBarButton" width="100%" height="20"
+		label="Resize" toolTip="Resize original photos to WxH"
+		changeValue="photos.resize(event.data)" />
+</mx:VBox>

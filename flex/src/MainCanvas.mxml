@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This is the main canvas area of the application. It toggles between Tile and List view.
+The List view uses List component for right side, whereas Tile view uses the Tile component.
+-->
+
+<mx:ViewStack xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:local="*">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.List;
+			import mx.controls.TileList;
+			import mx.events.ListEvent;
+			
+			import mx.events.PropertyChangeEvent;
+			private var _photos:Photos;
+			
+			[Bindable]
+			public function set photos(value:Photos):void
+			{
+				var oldValue:Photos = _photos;
+				_photos = value;
+				
+				if (value != oldValue) {
+					if (value) {
+						value.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, propertyChangeHandler, false, 0, true);
+						this.selectedIndex = value.tileView ? 0 : 1;
+					}
+					if (oldValue != null) {
+						oldValue.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, propertyChangeHandler);
+					}
+				}
+			}
+			public function get photos():Photos
+			{
+				return _photos;
+			}
+			
+			private function propertyChangeHandler(event:PropertyChangeEvent):void
+			{
+				if (event.property == "tileView") {
+					this.selectedIndex = photos.tileView ? 0 : 1;
+				}
+			}
+			
+			private function tileChangeHandler(event:ListEvent):void
+			{
+				var tile:TileList = event.currentTarget as TileList;
+				
+				photos.selectedItems = tile.selectedItems;
+			}
+			
+			private function listChangeHandler(event:ListEvent):void
+			{
+				var list:List = event.currentTarget as List;
+				if (list.selectedItem != null) {
+					photos.selectedItem = list.selectedItem as Photo;
+				}
+			}
+			
+			private function itemClickHandler(event:ListEvent):void
+			{
+				photos.selectedItem = photos.items.getItemAt(event.rowIndex) as Photo;
+			}
+			
+			private function tileItemDoubleClickHandler(event:ListEvent):void
+			{
+				var photo:Photo = event.itemRenderer.data as Photo;
+				photos.selectedItem = photo;
+				photos.tileView = false;
+			}
+			
+			private function listItemDoubleClickHandler(event:MouseEvent):void
+			{
+				photos.tileView = true;
+				photos.selectedItem = null;
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas width="100%" height="100%">
+		<mx:TileList styleName="PhotoTile" itemRenderer="PhotoItem"  
+			width="100%" height="100%" columnWidth="{Photo.THUMB_WIDTH}"
+			dataProvider="{photos.items}"
+			allowMultipleSelection="true" allowDragSelection="true" 
+			dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" selectable="true" doubleClickEnabled="true" 
+			change="tileChangeHandler(event)"
+			itemDoubleClick="tileItemDoubleClickHandler(event)" />
+			<!--
+			dragComplete="photos.dirty=true"
+			-->
+	</mx:Canvas>
+	
+	<mx:HBox width="100%" height="100%" horizontalGap="0">
+		<mx:Canvas id="_photoCanvas" width="100%" height="100%">
+			<local:PhotoItem width="{_photoCanvas.width}" height="{_photoCanvas.height}"
+				fullMode="true" data="{photos.selectedItem}" backgroundColor="#ffffff"
+				doubleClickEnabled="true" doubleClick="listItemDoubleClickHandler(event)" />
+		</mx:Canvas>
+		
+		<mx:List styleName="PhotoList" itemRenderer="PhotoItem"  
+			width="200" height="100%" columnWidth="{Photo.THUMB_WIDTH}"
+			dataProvider="{photos.items}" selectable="true"
+			itemClick="itemClickHandler(event)" 
+			change="listChangeHandler(event)" />
+		<!--
+			dragComplete="photos.dirty=true"
+		-->
+	</mx:HBox>
+
+</mx:ViewStack>

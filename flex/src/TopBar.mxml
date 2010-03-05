@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This is the top menu bar of the application. It invokes methods on the photos object
+when some buttons are clicked. The logout and help events are handled by the main 
+application.
+-->
+
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	styleName="TopBar" width="100%" height="30">
+	
+	<mx:Metadata>
+		[Event(name="logout", type="flash.events.Event")]
+		[Event(name="help", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			public var photos:Photos;
+
+			private function tileViewClickHandler(event:Event):void
+			{ 
+				photos.tileView = !photos.tileView;
+				var value:Boolean = photos.tileView;
+				if (value) {
+					photos.selectedItem = null;
+				} 
+				else {
+					if (photos.selected) {
+						photos.selectedItem = photos.selectedItems[0] as Photo;
+					}
+					else {
+						photos.selectedItem = (photos.items.length > 0 ? photos.items.getItemAt(0) : null) as Photo;
+					}
+				}
+				photos.tileView = value;
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Spacer width="20"/>
+	<mx:Image source="@Embed('icons/icon_photo.png')"/>
+	<mx:Label styleName="ProjectName" text="My Photo Share" />
+	<mx:Text styleName="StatusText" width="100%" text="{photos.status}"/>
+	<mx:Label styleName="UserName" text="{PhotoApi.user}" />
+	
+	<mx:LinkButton styleName="Link" label="Upload" toolTip="Upload more photos from your computer" 
+		click="photos.upload()" />
+	<mx:Text styleName="Separator" text="|"/>
+	<mx:LinkButton styleName="Link" label="{photos.tileView ? 'List' : 'Tile'}" toolTip="Toggle between tile and list view" 
+		click="tileViewClickHandler(event)" />
+	<mx:Text styleName="Separator" text="|"/>
+	<mx:LinkButton styleName="Link" label="Privacy" toolTip="Whose photos you want to view?" 
+		click="photos.privacy()" />
+	<mx:Text styleName="Separator" text="|"/>
+	<mx:LinkButton styleName="Link" label="Help" toolTip="See user manual document" 
+		click="dispatchEvent(new Event('help', true, true))" />
+	<mx:Text styleName="Separator" text="|"/>
+	<mx:LinkButton styleName="Link" label="Sign Out" toolTip="signout and go to login page"
+		click="dispatchEvent(new Event('logout', true, true))" />
+	<mx:Spacer width="5" />
+</mx:HBox>

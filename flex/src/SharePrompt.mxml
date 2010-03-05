@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This is the dialog box for the sharing settings of the files.
+-->
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" styleName="Popup" 
+	width="400" height="300" showCloseButton="true" alpha="1.0" title="Sharing Photos With Your Friends"
+	creationComplete="createdHandler(event)"
+	close="closeHandler(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			public var photos:Photos;
+			
+			[Bindable]
+			private var _top:String = "";
+			
+			[Bindable]
+			private var _error:String = "";
+			
+			[Bindable]
+			private var _original:String = "";
+			
+			[Bindable]
+			private var _single:Boolean = true;
+			
+			private var _ids:Array = [];
+			private var _users:Array = [];
+			
+			private function createdHandler(event:Event):void
+			{
+				if (photos.selected) {
+					if (photos.selectedItems.length == 1) 
+						_top = "Selected \"" + Photo(photos.selectedItems[0]).caption + "\"";
+					else
+						_top = "Selected " + photos.selectedItems.length + " photos";
+						
+					for each (var item:Photo in photos.selectedItems) {
+						_ids.push(item.id);
+					}
+				}
+				
+				_single = (_ids.length == 1);
+				
+				if (_single) {
+					var resultHandler:Function = function(event:ResultEvent):void
+					{
+						trace("share received " + event.result);
+						for each (var xml:XML in event.result.user) {
+							_users.push(String(xml));
+						}
+						_users = _users.sort();
+						_original = _text.text = (_users.length > 0 ? _users.join("\r") : "");
+					};
+					
+					var faultHandler:Function = function(event:FaultEvent):void {
+						trace("share load: " + event.message);
+						_error = "Error loading existing sharing information";
+					}
+					
+					trace("loading /api/share?id=" + _ids.join(","));
+					PhotoApi.request("/api/share?id=" + _ids.join(","), resultHandler, faultHandler);
+				}
+			}
+			
+			private function saveHandler(event:Event):void
+			{
+				if (_single) 
+					saveSingle();
+				else
+					saveMultiple();
+			}
+			
+			private function saveSingle():void
+			{
+				var newUsers:Array = _text.text.split(/[\ ;,\r]/);
+				var old:String = _original;
+				_original = _text.text;
+				
+				var resultHandler:Function = function(event:ResultEvent):void {
+					_error = "Saved sharing information";
+					_users = newUsers;
+				}
+				
+				var faultHandler:Function = function(event:FaultEvent):void {
+					_original = old;
+					_error = "Error saving sharing information";
+				}
+				
+				var add:Array = [];
+				var remove:Array = [];
+				for each (var oldUser:String in _users) {
+					if (newUsers.indexOf(oldUser) < 0)
+						remove.push(oldUser);
+				}
+				for each (var newUser:String in newUsers) {
+					if (_users.indexOf(newUser) < 0) {
+						if (newUser.replace(/\ /g, '') != "")
+							add.push(newUser);
+					}
+				}
+				
+				trace("loading /api/share?id=" + _ids.join(",") + "&add=" + add.join(",") + "&remove=" + remove.join(","));
+				
+				PhotoApi.request("/api/share?id=" + _ids.join(",") 
+					+ "&add=" + add.join(",") + "&remove=" + remove.join(","), resultHandler, faultHandler);
+			}
+			
+			private function saveMultiple():void
+			{
+				var add:Array = [];
+				var remove:Array = [];
+				for each (var a:String in _add.text.split(/[\ ;,\r]/)) {
+					if (a.replace(/\ /g, '') != "")
+						add.push(a);
+				}
+				for each (var b:String in _remove.text.split(/[\ ;,\r]/)) {
+					if (b.replace(/\ /g, '') != "")
+						remove.push(b);
+				}
+				
+				var resultHandler:Function = function(event:ResultEvent):void {
+					_error = "Saved sharing information";
+					_add.text = "";
+					_remove.text = "";
+				}
+				
+				var faultHandler:Function = function(event:FaultEvent):void {
+					_error = "Error saving sharing information";
+				}
+
+				trace("loading /api/share?id=" + _ids.join(",") + "&add=" + add.join(",") + "&remove=" + remove.join(","));
+				
+				PhotoApi.request("/api/share?id=" + _ids.join(",") 
+					+ "&add=" + add.join(",") + "&remove=" + remove.join(","), resultHandler, faultHandler);
+			}
+			
+			private function closeHandler(event:Event):void
+			{
+				if (this.isPopUp) {
+					PopUpManager.removePopUp(this);
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Text text="{_top}" visible="{_error == ''}" top="10" left="10" right="10"/>
+	<mx:Text text="{_error}" visible="{_error != ''}" top="10" left="10" right="10" color="#ff0000"/>
+	
+	<mx:Text text="List emails, one per line, of your friends to share with:"
+		top="35" left="10" right="10"/>
+	<mx:ViewStack id="_view" top="60" left="10" right="10" bottom="40"
+		selectedIndex="{_single ? 0 : 1}">
+		<mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:TextArea id="_text" width="100%" height="100%" creationComplete="TextArea(event.currentTarget).setFocus()"/>
+		</mx:Canvas>
+	
+		<mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:Text text="Add share with:" top="0" left="20"/>
+			<mx:Text text="Remove share with:" top="0" right="20"/>
+			<mx:TextArea id="_add" top="20" left="10" width="{this.width/2-30}" height="100%" 
+				creationComplete="TextArea(event.currentTarget).setFocus()"/>
+			<mx:TextArea id="_remove" top="20" right="10" width="{this.width/2-30}" height="100%"/>
+		</mx:Canvas>
+	</mx:ViewStack>
+	
+	<mx:Button styleName="PopupButton" label="Save"
+		bottom="10" width="60" height="24" horizontalCenter="0" 
+		enabled="{_single &amp;&amp; (_original != _text.text) || !_single &amp;&amp; (_add.text != '' || _remove.text != '')}" 
+		click="saveHandler(event)" />
+</mx:TitleWindow>

@@ -1,0 +1,170 @@
+/* CSS file */
+
+Alert {
+	color: #000000;
+	background-color: #cdcdcd;
+	corner-radius: 0;
+	border-thickness-left: 5;
+	border-thickness-right: 5;
+	border-thickness-bottom: 5;
+	border-thickness-top: 5;
+	border-color: #808080;
+}
+
+Application {
+	background-color: #ffffff;
+	corner-radius: 0;
+}
+
+Button.ButtonBarButton {
+	corner-radius: 0;
+	text-align: right;
+	font-weight: normal;
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	padding-right: 0;
+}
+Button.PopupButton {
+	corner-radius: 0;
+	text-align: center;
+	font-weight: bold;
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	padding-right: 0;
+}
+Button.SmallButton {
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	corner-radius: 0;
+	fill-colors: #cdcdcd, #cdcdcd;
+	fill-alphas: 1.0, 1.0;
+	color: #000000;
+}
+
+Canvas.PhotoCaption {
+	bottom: 0;
+	left: 0;
+	right: 0;
+	horizontal-align: center;
+	horizontal-center: 0;
+}
+
+Canvas.ThumbCanvas {
+	vertical-center: -20;
+	horizontal-center: 0;
+	border-color: #cdcdcd;
+	border-thickness: 1;
+	border-style: solid;
+	drop-shadow-enabled: true;
+	shadow-distance: 4;
+	shadow-direction: right;
+}
+
+HBox.TopBar {
+	background-color: #cdcdcd;
+	horizontal-align: right;
+	vertical-align: bottom;
+	horizontal-gap: 0;
+}
+
+Image.ThumbImage {
+	horizontal-align: center;
+	vertical-align: middle;
+ 	horizontalCenter: 0;
+ 	verticalCenter: 0;
+ }
+
+Label.ProjectName {
+	font-size: 20;
+	color: #808080;
+}
+
+Label.UserName {
+	font-weight: bold;
+	font-size: 12;
+}
+
+LinkButton.Link {
+	color: #0000ff;
+	roll-over-color: #cdcdcd;
+	font-weight: normal;
+	corner-radius: 0;
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 0;
+}
+
+TitleWindow.Popup {
+	corner-radius: 0;
+	border-thickness-left: 2;
+	border-thickness-right: 2;
+	border-thickness-bottom: 2;
+	border-thickness-top: 2;
+	background-alpha: 1;
+	border-color: #cdcdcd;
+	shadow-direction: right;
+	border-alpha: 1.0;
+}
+
+Text {
+	font-size: 12;
+}
+
+Text.DimensionText {
+	font-size: 10;
+	font-weight: normal;
+	color: #ffffff;
+}
+
+Text.LoadingText {
+ 	horizontal-center: 0;
+ 	vertical-center: 0;
+ 	color: #cdcdcd;
+ 	font-size: 18;
+}
+Text.OwnerText {
+	color: #808080;
+	bottom: 20;
+	horizontal-center: 0;
+	font-size: 10;
+}
+
+Text.Separator {
+	color: #808080;
+	font-size: 14;
+}
+Text.StatusText {
+	font-size: 12;
+	color: #ff0000;
+}
+
+TileList.PhotoTile {
+	border-style: solid;
+	border-thickness: 0;
+}
+
+List.PhotoList {
+	border-style: solid;
+	border-thickness: 0;
+}
+
+ToolTip {
+	drop-shadow-enabled: true;
+	shadow-distance: 2;
+	corner-radius: 0;
+}
+
+VBox.ButtonBar {
+	background-color: #cdcdcd;
+	horizontal-align: right;
+	vertical-align: top;
+	vertical-gap: 0;
+	padding-left: 2;
+	padding-right: 2;
+	padding-top: 2;
+	padding-bottom: 2;
+}

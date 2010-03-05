@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This class displays a single photo. It has the image area and the caption area. There are other
+optional user interface items which are displayed under some condition. For example, when 
+fullMode is true, it displays the zoom-in/out and delete button on top-right corner.
+It also displays the dimension when mouse overed. If the author of the photo is not
+the logged in user, then it displays the author below the photo.
+
+This veiw is used for both the thumb-nail and the full size photo.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="{Photo.THUMB_WIDTH}" height="{Photo.THUMB_HEIGHT}"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off" xmlns:all="*" 
+	rollOver="hover=true" rollOut="hover=false">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.MoveEvent;
+			import mx.events.FlexEvent;
+			import mx.controls.Image;
+			
+			[Bindable]
+			public var fullMode:Boolean = false;
+			
+			[Bindable]
+			private var _photo:Photo;
+			
+			[Bindable]
+			private var hover:Boolean = false;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				var oldValue:Object = _photo;
+				_photo = value as Photo;
+				
+				if (value != oldValue) {
+					if (value != null) {
+						updateImage();
+						if (fullMode)
+							value.download();
+						value.addEventListener(FlexEvent.DATA_CHANGE, photoDataHandler, false, 0, true);
+						value.addEventListener("rotateLeft", photoChangeHandler, false, 0, true);
+						value.addEventListener("rotateRight", photoChangeHandler, false, 0, true);
+						value.addEventListener("flipHorizontal", photoChangeHandler, false, 0, true);
+						value.addEventListener("flipVertical", photoChangeHandler, false, 0, true);
+					}
+					else {
+						oldValue.removeEventListener(FlexEvent.DATA_CHANGE, photoDataHandler);
+						value.removeEventListener("rotateLeft", photoChangeHandler);
+						value.removeEventListener("rotateRight", photoChangeHandler);
+						value.removeEventListener("flipHorizontal", photoChangeHandler);
+						value.removeEventListener("flipVertical", photoChangeHandler);
+					}
+				}
+			}
+			
+			private function photoDataHandler(event:Event):void
+			{
+				updateImage();
+			}
+			
+			private function imageCreatedHandler(event:Event):void
+			{
+				updateImage();
+			}
+			
+			private function updateImage():void
+			{
+				if (_image != null && _photo != null && _photo.valid) { 
+					_image.source = (_photo.thumb == null || (fullMode && _photo.data != null) ? _photo.data : _photo.thumb);
+					imageCompleteHandler(null);
+				}
+			}
+			
+			private function imageCompleteHandler(event:Event):void
+			{
+				var mxWidth:Number = this.width-20;
+				var mxHeight:Number = this.height-60;
+				var ratio:Number = _image.contentWidth / _image.contentHeight;
+				_canvas.width = _image.width = Math.min(mxWidth, mxHeight*ratio);
+				_canvas.height = _image.height = Math.min(mxHeight, mxWidth/ratio);
+				_loadingText.visible = false;
+			}
+			
+			private function zoom(value:Boolean):void
+			{
+				if (value)
+					_photo.zoomCount++;
+				else
+					_photo.zoomCount--;
+				var scale:Number = _photo.zoomCount >= 0 ? (1 + 0.2*_photo.zoomCount) : Math.max(0.3, 1 + 0.1*_photo.zoomCount);
+				_image.scaleX = _image.scaleY = scale;
+				_image.validateNow();
+				
+				if (_photo.zoomCount <= 0) {
+					_canvas.width = _image.width;
+					_canvas.height = _image.height;
+					if (_image.styleName != "ThumbImage")
+						_image.styleName = "ThumbImage";
+				}
+				else {
+					_image.styleName = null;
+				}
+				
+				if (_photo.zoomCount > 0) {
+					if (_image.x > 0)
+						_image.x = 0;
+					if (_image.y > 0)
+						_image.y = 0;
+					if (_image.x+_image.width < _canvas.width)
+						_image.x = _canvas.width - _image.width;
+					if (_image.y+_image.height < _canvas.height)
+						_image.y = _canvas.height - _image.height;
+				}
+				else {
+					_image.x = _image.y = 0;
+				}
+			}
+			
+			private function mouseDownHandler(event:MouseEvent):void
+			{
+				if (_photo.zoomCount > 0) {
+					event.stopPropagation();
+					_image.startDrag();
+				}
+			}
+			private function mouseUpHandler(event:MouseEvent):void
+			{
+				if (_photo.zoomCount > 0) {
+					event.stopPropagation();
+					_image.stopDrag();
+					_image.validateNow();
+
+					if (_image.x > 0)
+						_image.x = 0;
+					if (_image.y > 0)
+						_image.y = 0;
+					if ((_image.x+_image.width) < _canvas.width)
+						_image.x = _canvas.width - _image.width;
+					if ((_image.y+_image.height) < _canvas.height)
+						_image.y = _canvas.height - _image.height;
+				}
+			}
+			
+			private function photoChangeHandler(event:Event):void
+			{
+				if (fullMode && _photo != null)
+					callLater(_photo.download, [true]);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas styleName="ThumbCanvas" autoLayout="true">
+		
+		<mx:Text id="_loadingText" styleName="LoadingText" text="Loading"/>
+		
+		<mx:Canvas id="_canvas" width="{this.width-40}" height="{this.height-60}"
+			horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:Image id="_image" styleName="ThumbImage" 
+				width="{this.width-40}" height="{this.height-40}"
+				maintainAspectRatio="true"
+				creationComplete="imageCreatedHandler(event)"
+				complete="imageCompleteHandler(event)"
+				mouseDown="mouseDownHandler(event)" mouseUp="mouseUpHandler(event)"/>
+			<mx:Text styleName="DimensionText" 
+				text="{hover &amp;&amp; _photo.dimension != null ? _photo.dimension : ''}"
+				bottom="5" right="5"/>
+				
+			<mx:Button styleName="SmallButton" width="20" height="20" right="43" top="1" label="D" toolTip="Download"
+				buttonMode="true" visible="{hover &amp;&amp; fullMode}" includeInLayout="{fullMode}" 
+				click="_photo.downloadSave()" doubleClickEnabled="true" doubleClick="event.stopImmediatePropagation()"/>
+		
+			<mx:Button styleName="SmallButton" width="20" height="20" right="22" top="1" label="+" toolTip="Zoom in"
+				buttonMode="true" visible="{hover &amp;&amp; fullMode}" includeInLayout="{fullMode}" 
+				click="zoom(true)" doubleClickEnabled="true" doubleClick="event.stopImmediatePropagation()"/>
+		
+			<mx:Button styleName="SmallButton" width="20" height="20" right="1" top="1" label="-" toolTip="Zoom out"
+				buttonMode="true" visible="{hover &amp;&amp; fullMode}" includeInLayout="{fullMode}" 
+				click="zoom(false)" doubleClickEnabled="true" doubleClick="event.stopImmediatePropagation()"/>
+		</mx:Canvas>
+			
+			
+	</mx:Canvas>
+	
+	<mx:Text styleName="OwnerText"
+		text="by {_photo.author.length > 30 ? _photo.author.substr(0, 28) + '...' : _photo.author}"
+		toolTip="This photo is owned by {_photo.author}"
+		includeInLayout="{_photo.author != PhotoApi.user}" visible="{_photo.author != PhotoApi.user}" 
+		/>
+	
+	<all:PhotoCaption photo="{_photo}" maxWidth="{this.width}"/>
+</mx:Canvas>

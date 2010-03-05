@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+This class presents the button which when clicked converts to the 
+editable text box where user can enter some text. When the user pressed
+the enter key, this dispatches the "changeValue" event.
+
+This class is used for the "Resize" button in the secondary menu.
+-->
+
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="40" height="20"
+	horizontalScrollPolicy="off" verticalScrollPolicy="off">
+
+	<mx:Metadata>
+		[Event(name="changeValue", type="flash.events.DataEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			public var buttonStyleName:String;
+			
+			[Bindable]
+			private var editing:Boolean = false;
+			
+			private function buttonClickHandler():void
+			{
+				editing = true;
+				_text.setFocus();
+			}
+			
+			private function textEnterHandler(event:Event):void
+			{
+				editing = false;
+				var text:String = TextInput(event.currentTarget).text;
+				trace("dispatching event to change dimension to " + text);
+				dispatchEvent(new DataEvent("changeValue", false, false, text));
+			}
+		]]>
+	</mx:Script>
+	<mx:Button styleName="{buttonStyleName}" width="100%" height="{this.height-1}" buttonMode="true" 
+		label="{this.label}" toolTip="{this.toolTip}" visible="{!editing}"
+		click="buttonClickHandler()" />
+		
+	<mx:TextInput id="_text" width="100%" height="100%" toolTip="Type here and then press 'enter' key"
+		text="640x480" visible="{editing}" textAlign="left"
+		enter="textEnterHandler(event)" />
+
+</mx:Canvas>
